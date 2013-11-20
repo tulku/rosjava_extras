@@ -66,6 +66,7 @@ public class Device implements LaserScannerDevice {
   private final LaserScannerConfiguration configuration;
   private final RemoteUptimeClock remoteUptimeClock;
 
+
   /**
    * It is not necessary to provide buffered streams. Buffering is handled
    * internally.

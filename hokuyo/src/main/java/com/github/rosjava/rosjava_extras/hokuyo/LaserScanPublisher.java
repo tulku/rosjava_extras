@@ -19,6 +19,8 @@ package com.github.rosjava.rosjava_extras.hokuyo;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
 import org.ros.node.ConnectedNode;
@@ -30,6 +32,8 @@ import org.ros.node.topic.Publisher;
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class LaserScanPublisher extends AbstractNodeMain {
+
+  private static final Log log = LogFactory.getLog(LaserScanPublisher.class);
 
   private final LaserScannerDevice laserScannerDevice;
 
@@ -101,15 +105,26 @@ public class LaserScanPublisher extends AbstractNodeMain {
     result.setAngleMin(configuration.getMinimumAngle());
     result.setAngleMax(configuration.getMaximumAngle());
     int numberOfConfiguredRanges = configuration.getLastStep() - configuration.getFirstStep() + 1;
+    if(numberOfConfiguredRanges > scan.getRanges().length) {
+        log.warn("Number of scans in configuration does not match received range measurements ("+
+                numberOfConfiguredRanges + " > "+ scan.getRanges().length + ").");
+    }
+    /*
     Preconditions.checkState(numberOfConfiguredRanges <= scan.getRanges().length, String.format(
         "Number of scans in configuration does not match received range measurements (%d > %d).",
         numberOfConfiguredRanges, scan.getRanges().length));
+        */
     float[] ranges = new float[numberOfConfiguredRanges];
+    int scannedRanges = scan.getRanges().length;
     for (int i = 0; i < numberOfConfiguredRanges; i++) {
       int step = i + configuration.getFirstStep();
       // Select only the configured range measurements and convert from
       // millimeters to meters.
-      ranges[i] = (float) (scan.getRanges()[step] / 1000.0);
+      if(step>=scannedRanges) {
+        ranges[i] = 0;
+      } else {
+        ranges[i] = (float) (scan.getRanges()[step] / 1000.0);
+      }
     }
     result.setRanges(ranges);
     result.setTimeIncrement(configuration.getTimeIncrement());
