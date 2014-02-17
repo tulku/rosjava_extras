@@ -117,7 +117,7 @@ public class Device implements LaserScannerDevice {
     boolean ready = false;
     while (!ready) {
       ready = true;
-      // NOTE(Julian Cerruti) At this moment, the sent command does not matter much.
+      // NOTE: At this moment, the sent command does not matter much.
       // Currently fixed to (0; 768)
       write("MD0000076800001");
       try {
